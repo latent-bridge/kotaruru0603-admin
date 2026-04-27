@@ -15,6 +15,7 @@ import {
   putArchiveOverride,
   quickHide,
   quickPin,
+  refreshArchiveFromYouTube,
 } from "@/lib/api";
 
 const ARCHIVE_CATEGORIES = ["ポンコツだいぶ", "ポンコツさむらい", "ゆるげーむ", "こらぼ"] as const;
@@ -98,6 +99,8 @@ export default function ArchivePage() {
   const [error, setError] = useState<string | null>(null);
   const [editing, setEditing] = useState<ArchiveItem | null>(null);
   const [busyVideoId, setBusyVideoId] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshMessage, setRefreshMessage] = useState<string | null>(null);
 
   const reload = useCallback(async () => {
     setLoading(true);
@@ -164,14 +167,57 @@ export default function ArchivePage() {
     }
   };
 
+  const refresh = async () => {
+    if (!confirm("YouTube から動画一覧を再取得します。新しい配信があれば追加・既存の視聴数なども更新されます。\n(GitHub Actions で 1〜2 分かかります)")) return;
+    setRefreshing(true);
+    setRefreshMessage(null);
+    try {
+      await refreshArchiveFromYouTube();
+      setRefreshMessage("再取得を開始しました。GitHub Actions の完了 (~2分) 後にこの画面を再読込してください。");
+    } catch (e) {
+      setRefreshMessage(`再取得失敗: ${(e as Error).message}`);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
   return (
     <Shell>
-      <div style={{ marginBottom: 16 }}>
-        <h1 style={{ fontSize: 24, margin: 0, color: PALETTE.ink }}>アーカイブ</h1>
-        <p style={{ margin: "4px 0 0", fontSize: 12, color: PALETTE.inkDim }}>
-          ピン留め・非表示・カテゴリ・タグの編集 (タイトル / サムネは YouTube で管理)
-        </p>
+      <div style={{ marginBottom: 16, display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, flexWrap: "wrap" }}>
+        <div>
+          <h1 style={{ fontSize: 24, margin: 0, color: PALETTE.ink }}>アーカイブ</h1>
+          <p style={{ margin: "4px 0 0", fontSize: 12, color: PALETTE.inkDim }}>
+            ピン留め・非表示・カテゴリ・タグの編集 (タイトル / サムネは YouTube で管理)
+          </p>
+        </div>
+        <button
+          onClick={refresh}
+          disabled={refreshing}
+          style={{
+            padding: "8px 16px",
+            background: refreshing ? PALETTE.inkDim : PALETTE.paper,
+            color: refreshing ? "#fff" : PALETTE.ink,
+            border: `1.5px solid ${PALETTE.coral}`,
+            borderRadius: RADIUS.md,
+            fontSize: 12,
+            fontWeight: 700,
+          }}
+        >
+          {refreshing ? "送信中…" : "🔄 YouTube から再取得"}
+        </button>
       </div>
+
+      {refreshMessage && (
+        <div style={{
+          padding: 10,
+          background: refreshMessage.includes("失敗") ? "#fbe0e4" : "#d6e6d8",
+          border: `1.5px solid ${refreshMessage.includes("失敗") ? "#c25470" : "#5a8870"}`,
+          color: refreshMessage.includes("失敗") ? "#9a3a52" : "#3a5a4a",
+          borderRadius: RADIUS.md,
+          marginBottom: 12,
+          fontSize: 12,
+        }}>{refreshMessage}</div>
+      )}
 
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 12 }}>
         {(["all", "pinned", "hidden"] as FilterKey[]).map((f) => (

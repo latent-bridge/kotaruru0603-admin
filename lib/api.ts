@@ -248,6 +248,14 @@ export function quickHide(videoId: string, hidden: boolean, siteId = SITE_ID) {
   );
 }
 
+export function refreshArchiveFromYouTube(siteId = SITE_ID) {
+  return jsonRequest<{ ok: true; dispatch: { dispatched: boolean } }>(
+    "POST",
+    `/admin/archive/${siteId}/refresh`,
+    {},
+  );
+}
+
 // Admin variant returns ALL messages (including hidden / deleted) so the
 // moderator can see what they've acted on. Public /chat/:siteId/messages
 // continues to filter for the fan site.
