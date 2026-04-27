@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Shell } from "@/components/Shell";
-import { CATEGORY_COLOR, CATEGORY_OPTIONS, PALETTE, RADIUS, type Category } from "@/lib/design";
+import { EMOJI_PRESETS, PALETTE, PRESET_TAGS, RADIUS, tagColor } from "@/lib/design";
 import { getSchedule, putSchedule, type ScheduleEntry } from "@/lib/api";
 
 // 14 days today through today+13, split into 2 tabs of 7 days each. Adding
@@ -43,14 +43,20 @@ function buildEmptyEntry(date: string): ScheduleEntry {
     date,
     title: "",
     time: "",
-    category: null,
+    tags: [],
     emoji: "",
     note: "",
   };
 }
 
 function entryHasContent(e: ScheduleEntry): boolean {
-  return !!(e.title?.trim() || e.time?.trim() || e.note?.trim() || e.category || e.emoji?.trim());
+  return !!(
+    e.title?.trim() ||
+    e.time?.trim() ||
+    e.note?.trim() ||
+    e.tags.length > 0 ||
+    e.emoji?.trim()
+  );
 }
 
 function buildRange(today: Date): { start: string; end: string; days: string[] } {
@@ -143,7 +149,7 @@ export default function SchedulePage() {
           date: d.entry.date,
           title: d.entry.title?.trim() || null,
           time: d.entry.time?.trim() || null,
-          category: d.entry.category,
+          tags: d.entry.tags,
           emoji: d.entry.emoji?.trim() || null,
           note: d.entry.note?.trim() || null,
         }));
@@ -286,8 +292,11 @@ function DayCard({
 }) {
   const { entry, weekday, label, monthDay, hasContent } = dayState;
   const wkColor = weekday === 0 ? "#c25470" : weekday === 6 ? "#5a7ab4" : PALETTE.inkDim;
-  const cat = (entry.category as Category | null) ?? null;
-  const catStyle = cat ? CATEGORY_COLOR[cat] : null;
+
+  const toggleTag = (tag: string) => {
+    const has = entry.tags.includes(tag);
+    onChange("tags", has ? entry.tags.filter((t) => t !== tag) : [...entry.tags, tag]);
+  };
 
   return (
     <div
@@ -311,12 +320,21 @@ function DayCard({
         )}
       </div>
 
-      <div className="sc-main">
-        <input
-          placeholder="タイトル (例: ポンコツダイバー #22)"
-          value={entry.title ?? ""}
-          onChange={(e) => onChange("title", e.target.value)}
-        />
+      <div className="sc-content">
+        <div className="sc-row">
+          <input
+            placeholder="タイトル (例: ポンコツダイバー #22)"
+            value={entry.title ?? ""}
+            onChange={(e) => onChange("title", e.target.value)}
+            style={{ flex: 1, minWidth: 0 }}
+          />
+          <input
+            placeholder="時刻 (例: 21:00 〜)"
+            value={entry.time ?? ""}
+            onChange={(e) => onChange("time", e.target.value)}
+            style={{ width: 160 }}
+          />
+        </div>
         <textarea
           placeholder="ノート (例: アリンお姉様とコラボ)"
           value={entry.note ?? ""}
@@ -324,46 +342,12 @@ function DayCard({
           rows={2}
           style={{ resize: "vertical" }}
         />
+
+        <TagPicker tags={entry.tags} onToggle={toggleTag}
+          onAdd={(t) => !entry.tags.includes(t) && onChange("tags", [...entry.tags, t])} />
+
+        <EmojiPicker value={entry.emoji ?? ""} onChange={(v) => onChange("emoji", v)} />
       </div>
-
-      <div className="sc-aux">
-        <input
-          placeholder="時刻 (例: 21:00 〜)"
-          value={entry.time ?? ""}
-          onChange={(e) => onChange("time", e.target.value)}
-        />
-        {catStyle && (
-          <span style={{
-            alignSelf: "flex-start",
-            padding: "3px 10px",
-            background: catStyle.bg,
-            color: catStyle.color,
-            borderRadius: 999,
-            fontSize: 11,
-            fontWeight: 700,
-          }}>{cat}</span>
-        )}
-      </div>
-
-      <select
-        className="sc-cat"
-        value={entry.category ?? ""}
-        onChange={(e) => onChange("category", e.target.value || null)}
-      >
-        <option value="">カテゴリを選ぶ</option>
-        {CATEGORY_OPTIONS.map((c) => (
-          <option key={c} value={c}>{c}</option>
-        ))}
-      </select>
-
-      <input
-        className="sc-emoji"
-        placeholder="絵文字"
-        maxLength={4}
-        value={entry.emoji ?? ""}
-        onChange={(e) => onChange("emoji", e.target.value)}
-        style={{ textAlign: "center", fontSize: 20 }}
-      />
 
       <button
         className="sc-clear"
@@ -377,9 +361,149 @@ function DayCard({
           cursor: hasContent ? "pointer" : "default",
           opacity: hasContent ? 1 : 0.25,
           padding: "0 4px",
+          alignSelf: "start",
         }}
         disabled={!hasContent}
       >×</button>
+    </div>
+  );
+}
+
+function TagPicker({
+  tags,
+  onToggle,
+  onAdd,
+}: {
+  tags: string[];
+  onToggle: (tag: string) => void;
+  onAdd: (tag: string) => void;
+}) {
+  const [custom, setCustom] = useState("");
+  const submit = () => {
+    const t = custom.trim();
+    if (t) onAdd(t);
+    setCustom("");
+  };
+  // Tags currently selected but NOT in the preset list — render alongside
+  // presets so the user can toggle them off without retyping.
+  const customSelected = tags.filter((t) => !PRESET_TAGS.includes(t as never));
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+        {PRESET_TAGS.map((t) => {
+          const on = tags.includes(t);
+          const c = tagColor(t);
+          return (
+            <button
+              key={t}
+              type="button"
+              onClick={() => onToggle(t)}
+              style={{
+                padding: "4px 10px",
+                fontSize: 12,
+                fontWeight: 700,
+                background: on ? c.bg : "transparent",
+                color: on ? c.color : PALETTE.inkDim,
+                border: `1.5px solid ${on ? c.color : PALETTE.inkSoft}`,
+                borderRadius: 999,
+              }}
+            >#{t}</button>
+          );
+        })}
+        {customSelected.map((t) => {
+          const c = tagColor(t);
+          return (
+            <button
+              key={t}
+              type="button"
+              onClick={() => onToggle(t)}
+              style={{
+                padding: "4px 10px",
+                fontSize: 12,
+                fontWeight: 700,
+                background: c.bg,
+                color: c.color,
+                border: `1.5px solid ${c.color}`,
+                borderRadius: 999,
+              }}
+            >#{t} ×</button>
+          );
+        })}
+      </div>
+      <div style={{ display: "flex", gap: 6 }}>
+        <input
+          placeholder="自由タグを追加 (例: コラボ)"
+          value={custom}
+          onChange={(e) => setCustom(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") {
+              e.preventDefault();
+              submit();
+            }
+          }}
+          maxLength={30}
+          style={{ flex: 1, fontSize: 12, padding: "4px 10px" }}
+        />
+        <button
+          type="button"
+          onClick={submit}
+          disabled={!custom.trim() || tags.length >= 5}
+          style={{
+            padding: "4px 12px",
+            fontSize: 12,
+            background: PALETTE.paper,
+            border: `1.5px solid ${PALETTE.inkBorder}`,
+            borderRadius: 999,
+            color: PALETTE.ink,
+          }}
+        >追加</button>
+      </div>
+    </div>
+  );
+}
+
+function EmojiPicker({
+  value,
+  onChange,
+}: {
+  value: string;
+  onChange: (v: string) => void;
+}) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+        <span style={{ fontSize: 11, color: PALETTE.inkDim, minWidth: 36 }}>絵文字</span>
+        <input
+          placeholder="🎮"
+          maxLength={4}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          style={{ width: 80, textAlign: "center", fontSize: 20, padding: "2px 6px" }}
+        />
+        <span style={{ fontSize: 11, color: PALETTE.inkDim }}>または下から選択</span>
+      </div>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
+        {EMOJI_PRESETS.map((e) => {
+          const on = value === e;
+          return (
+            <button
+              key={e}
+              type="button"
+              onClick={() => onChange(on ? "" : e)}
+              style={{
+                width: 34,
+                height: 34,
+                fontSize: 18,
+                background: on ? PALETTE.coral : PALETTE.paper,
+                border: `1.5px solid ${on ? PALETTE.accent : PALETTE.inkSoft}`,
+                borderRadius: 8,
+                cursor: "pointer",
+              }}
+            >{e}</button>
+          );
+        })}
+      </div>
     </div>
   );
 }

@@ -48,7 +48,7 @@ export type ScheduleEntry = {
   date: string;       // YYYY-MM-DD (JST)
   title: string | null;
   time: string | null;
-  category: string | null;
+  tags: string[];
   emoji: string | null;
   note: string | null;
 };
