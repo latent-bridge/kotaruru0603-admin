@@ -171,10 +171,9 @@ export default function ChatPage() {
                   padding: "10px 12px",
                   borderBottom: `1px solid ${PALETTE.inkSoft}`,
                   background: isHidden ? "rgba(58,46,42,0.04)" : "transparent",
-                  opacity: isHidden ? 0.55 : 1,
                 }}
               >
-                <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ flex: 1, minWidth: 0, opacity: isHidden ? 0.55 : 1 }}>
                   <div style={{ fontSize: 11, color: PALETTE.inkDim, marginBottom: 3 }}>
                     <strong style={{ color: PALETTE.ink }}>{m.author}</strong>
                     {" · "}
