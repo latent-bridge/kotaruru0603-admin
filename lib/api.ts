@@ -126,10 +126,13 @@ export type ChatMessage = {
   timestamp: number;
 };
 
+// Admin variant returns ALL messages (including hidden / deleted) so the
+// moderator can see what they've acted on. Public /chat/:siteId/messages
+// continues to filter for the fan site.
 export function getChatMessages(siteId = SITE_ID) {
   return jsonRequest<{ messages: ChatMessage[] }>(
     "GET",
-    `/chat/${siteId}/messages`,
+    `/admin/chat/${siteId}/messages`,
   );
 }
 
