@@ -194,22 +194,22 @@ export default function ChatPage() {
                   <div style={{ wordBreak: "break-word", color: PALETTE.ink }}>{m.content}</div>
                 </div>
                 <div className="chat-message-actions" style={{ display: "flex", gap: 6, flexShrink: 0 }}>
+                  {action !== "delete" && (
+                    <button
+                      onClick={() => {
+                        if (!confirm(`このメッセージを Discord からも削除します。よろしいですか？\n\n${m.content}`)) return;
+                        withBusy(m.id, () => deleteMessage(m.id));
+                      }}
+                      disabled={busy.has(m.id)}
+                      style={btnStyle("#9a3a52", "#fbe0e4")}
+                    >削除</button>
+                  )}
                   {!isHidden && (
-                    <>
-                      <button
-                        onClick={() => withBusy(m.id, () => hideMessage(m.id))}
-                        disabled={busy.has(m.id)}
-                        style={btnStyle("#c26a50", "#fad8c8")}
-                      >非表示</button>
-                      <button
-                        onClick={() => {
-                          if (!confirm(`このメッセージを Discord からも削除します。よろしいですか？\n\n${m.content}`)) return;
-                          withBusy(m.id, () => deleteMessage(m.id));
-                        }}
-                        disabled={busy.has(m.id)}
-                        style={btnStyle("#9a3a52", "#fbe0e4")}
-                      >削除</button>
-                    </>
+                    <button
+                      onClick={() => withBusy(m.id, () => hideMessage(m.id))}
+                      disabled={busy.has(m.id)}
+                      style={btnStyle("#c26a50", "#fad8c8")}
+                    >非表示</button>
                   )}
                   {action === "hide" && (
                     <button
