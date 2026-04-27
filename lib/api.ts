@@ -7,6 +7,11 @@ export const SITE_ID =
 export const SITE_ORIGIN =
   process.env.NEXT_PUBLIC_SITE_ORIGIN ?? "https://kotaruru0603.latent-bridge.com";
 
+// Static JSON files staged by the public site's build (fetch-content.ts copies
+// them into public/data/). Admin reads them directly so it doesn't need a
+// separate API for raw video metadata.
+export const PUBLIC_DATA_BASE = `${SITE_ORIGIN}/data`;
+
 export type AdminUser = {
   id: string;
   display_name: string;
@@ -126,6 +131,122 @@ export type ChatMessage = {
   content: string;
   timestamp: number;
 };
+
+// ─── Archive ─────────────────────────────────────────────────────────────
+
+export type ArchiveRawVideo = {
+  videoId: string;
+  title: string;
+  description: string;
+  publishedAt: string;
+  durationSeconds: number;
+  viewCount: number;
+  likeCount: number | null;
+  thumbnails: { default: string; medium: string; high: string; maxres: string | null };
+  liveBroadcast: "none" | "live" | "upcoming" | "was_live";
+};
+
+export type ArchiveInferred = {
+  category?: string;
+  game?: string;
+  collabWith?: string[];
+  episode?: number;
+  tags?: string[];
+};
+
+export type ArchiveCuratedVideo = {
+  _inferred?: ArchiveInferred;
+  // legacy human top-level (admin DB takes precedence; these remain readable
+  // until we strip them, see chat-api migration plan).
+  category?: string;
+  game?: string;
+  collabWith?: string[];
+  episode?: number;
+  tags?: string[];
+  kind?: "stream" | "clip";
+  hidden?: boolean;
+  pinned?: boolean;
+  tone?: string;
+  memo?: string;
+};
+
+export type ArchiveOverride = {
+  video_id: string;
+  category: string | null;
+  game: string | null;
+  collab_with: string[] | null;
+  episode: number | null;
+  tags: string[] | null;
+  kind: string | null;
+  hidden: boolean | null;
+  pinned: boolean | null;
+  tone: string | null;
+  memo: string | null;
+};
+
+export async function fetchArchiveRaw(): Promise<ArchiveRawVideo[]> {
+  const res = await fetch(`${PUBLIC_DATA_BASE}/archive.raw.json`);
+  if (!res.ok) throw new Error(`raw fetch ${res.status}`);
+  const body = (await res.json()) as { videos: ArchiveRawVideo[] };
+  return body.videos ?? [];
+}
+
+export async function fetchArchiveCurated(): Promise<Record<string, ArchiveCuratedVideo>> {
+  const res = await fetch(`${PUBLIC_DATA_BASE}/archive.curated.json`);
+  if (!res.ok) throw new Error(`curated fetch ${res.status}`);
+  const body = (await res.json()) as { videos: Record<string, ArchiveCuratedVideo> };
+  return body.videos ?? {};
+}
+
+export function fetchArchiveOverrides(siteId = SITE_ID) {
+  return jsonRequest<{ overrides: ArchiveOverride[] }>(
+    "GET",
+    `/admin/archive/${siteId}/overrides`,
+  );
+}
+
+export type ArchivePatch = {
+  category?: string | null;
+  game?: string | null;
+  collab_with?: string[] | null;
+  episode?: number | null;
+  tags?: string[] | null;
+  kind?: "stream" | "clip" | null;
+  hidden?: boolean | null;
+  pinned?: boolean | null;
+  tone?: "coral" | "lilac" | "mint" | "cream" | null;
+  memo?: string | null;
+};
+
+export function putArchiveOverride(videoId: string, patch: ArchivePatch, siteId = SITE_ID) {
+  return jsonRequest<{
+    ok: true;
+    dispatch: { dispatched: boolean; reason?: string };
+  }>("PUT", `/admin/archive/${siteId}/${videoId}`, patch);
+}
+
+export function clearArchiveOverride(videoId: string, siteId = SITE_ID) {
+  return jsonRequest<{
+    ok: true;
+    dispatch: { dispatched: boolean; reason?: string };
+  }>("DELETE", `/admin/archive/${siteId}/${videoId}`);
+}
+
+export function quickPin(videoId: string, pinned: boolean, siteId = SITE_ID) {
+  return jsonRequest<{ ok: true; pinned: boolean; dispatch: { dispatched: boolean } }>(
+    "POST",
+    `/admin/archive/${siteId}/${videoId}/pin`,
+    { pinned },
+  );
+}
+
+export function quickHide(videoId: string, hidden: boolean, siteId = SITE_ID) {
+  return jsonRequest<{ ok: true; hidden: boolean; dispatch: { dispatched: boolean } }>(
+    "POST",
+    `/admin/archive/${siteId}/${videoId}/hide`,
+    { hidden },
+  );
+}
 
 // Admin variant returns ALL messages (including hidden / deleted) so the
 // moderator can see what they've acted on. Public /chat/:siteId/messages

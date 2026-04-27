@@ -10,6 +10,7 @@ import { PALETTE, RADIUS } from "@/lib/design";
 const NAV = [
   { href: "/live/", label: "ライブ配信" },
   { href: "/schedule/", label: "スケジュール" },
+  { href: "/archive/", label: "アーカイブ" },
   { href: "/chat/", label: "チャット" },
 ];
 
