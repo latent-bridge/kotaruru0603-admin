@@ -36,17 +36,23 @@ export function Shell({ children }: { children: React.ReactNode }) {
         style={{
           background: PALETTE.paper,
           borderBottom: `1px solid ${PALETTE.inkSoft}`,
-          padding: "0 24px",
-          display: "flex",
-          alignItems: "center",
-          height: 60,
-          gap: 16,
         }}
       >
-        <strong style={{ fontSize: 14, color: PALETTE.inkDim, letterSpacing: 0.5 }}>
-          管理者用ページ
-        </strong>
-        <nav style={{ display: "flex", gap: 6, flex: 1 }}>
+        <div className="admin-header-top">
+          <strong style={{ fontSize: 14, color: PALETTE.inkDim, letterSpacing: 0.5 }}>
+            管理者用ページ
+          </strong>
+          <button
+            onClick={async () => {
+              await logout();
+              window.location.reload();
+            }}
+            style={{ ...secondaryBtn, padding: "6px 12px", fontSize: 12 }}
+          >
+            ログアウト
+          </button>
+        </div>
+        <nav className="admin-header-nav">
           {NAV.map((n) => {
             const active = pathname?.startsWith(n.href);
             return (
@@ -60,6 +66,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
                   background: active ? "#fff" : "transparent",
                   fontWeight: active ? 700 : 500,
                   border: active ? `1.5px solid ${PALETTE.coral}` : "1.5px solid transparent",
+                  whiteSpace: "nowrap",
                 }}
               >
                 {n.label}
@@ -67,17 +74,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
             );
           })}
         </nav>
-        <button
-          onClick={async () => {
-            await logout();
-            window.location.reload();
-          }}
-          style={{ ...secondaryBtn, padding: "6px 12px", fontSize: 12 }}
-        >
-          ログアウト
-        </button>
       </header>
-      <main style={{ padding: "28px 24px 60px", maxWidth: 1100, margin: "0 auto" }}>
+      <main style={{ padding: "24px 24px 60px", maxWidth: 1100, margin: "0 auto" }}>
         {children}
       </main>
     </div>

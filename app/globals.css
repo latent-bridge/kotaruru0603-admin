@@ -29,17 +29,33 @@ input:focus, select:focus, textarea:focus {
 
 /* ─── Responsive helpers (admin layout) ──────────────────────────────── */
 
-/* Header: nav wraps below logo on narrow viewports, user info shrinks. */
+/* Header: title + logout on row 1, nav on row 2. Nav can horizontally scroll
+   on very narrow viewports without breaking the chip layout. */
 .admin-header {
-  flex-wrap: wrap;
-  row-gap: 8px;
-  padding: 10px 16px !important;
-  height: auto !important;
-  min-height: 60px;
+  display: flex;
+  flex-direction: column;
+  padding: 10px 24px;
+  gap: 8px;
 }
-.admin-header-user-tag { display: inline; }
+.admin-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.admin-header-nav {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  /* Hide scrollbar visually; the chips wrap if there's room and scroll only
+     if the viewport is genuinely too narrow for all 3 nav items. */
+  scrollbar-width: none;
+}
+.admin-header-nav::-webkit-scrollbar { display: none; }
+
 @media (max-width: 520px) {
-  .admin-header-user-tag { display: none; }
+  .admin-header { padding: 8px 16px; }
 }
 
 /* Schedule day-card: 6-col on desktop, single-column stack on phones. */
