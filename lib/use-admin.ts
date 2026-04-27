@@ -1,12 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { fetchMe, type AdminUser } from "./api";
+import { fetchAdminMe, type AdminUser } from "./api";
 
 export type AdminAuthState =
   | { status: "loading" }
   | { status: "anonymous" }
-  | { status: "not_admin"; user: AdminUser }
   | { status: "ready"; user: AdminUser };
 
 export function useAdminAuth(): AdminAuthState {
@@ -14,11 +13,10 @@ export function useAdminAuth(): AdminAuthState {
 
   useEffect(() => {
     let cancelled = false;
-    fetchMe()
+    fetchAdminMe()
       .then((user) => {
         if (cancelled) return;
         if (!user) return setState({ status: "anonymous" });
-        if (!user.is_admin) return setState({ status: "not_admin", user });
         setState({ status: "ready", user });
       })
       .catch(() => {

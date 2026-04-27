@@ -29,26 +29,6 @@ export function Shell({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (auth.status === "not_admin") {
-    return (
-      <CenterMessage>
-        <p>このアカウントには管理者権限がありません。</p>
-        <p style={{ color: PALETTE.inkDim, fontSize: 12 }}>
-          ログイン中: {auth.user.display_name || "(未設定)"} #{auth.user.tag}
-        </p>
-        <button
-          onClick={async () => {
-            await logout();
-            window.location.reload();
-          }}
-          style={secondaryBtn}
-        >
-          ログアウト
-        </button>
-      </CenterMessage>
-    );
-  }
-
   return (
     <div style={{ minHeight: "100vh", background: PALETTE.bg }}>
       <header
@@ -63,8 +43,8 @@ export function Shell({ children }: { children: React.ReactNode }) {
           gap: 16,
         }}
       >
-        <strong style={{ fontSize: 15, color: PALETTE.ink }}>
-          kotaruru0603 admin
+        <strong style={{ fontSize: 14, color: PALETTE.inkDim, letterSpacing: 0.5 }}>
+          管理者用ページ
         </strong>
         <nav style={{ display: "flex", gap: 6, flex: 1 }}>
           {NAV.map((n) => {
@@ -87,20 +67,15 @@ export function Shell({ children }: { children: React.ReactNode }) {
             );
           })}
         </nav>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <span className="admin-header-user-tag" style={{ color: PALETTE.inkDim, fontSize: 12 }}>
-            {auth.user.display_name || "admin"} #{auth.user.tag}
-          </span>
-          <button
-            onClick={async () => {
-              await logout();
-              window.location.reload();
-            }}
-            style={{ ...secondaryBtn, padding: "6px 12px", fontSize: 12 }}
-          >
-            ログアウト
-          </button>
-        </div>
+        <button
+          onClick={async () => {
+            await logout();
+            window.location.reload();
+          }}
+          style={{ ...secondaryBtn, padding: "6px 12px", fontSize: 12 }}
+        >
+          ログアウト
+        </button>
       </header>
       <main style={{ padding: "28px 24px 60px", maxWidth: 1100, margin: "0 auto" }}>
         {children}

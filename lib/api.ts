@@ -18,8 +18,10 @@ export type AdminUser = {
   tag: string;
 };
 
-export async function fetchMe(): Promise<AdminUser | null> {
-  const res = await fetch(`${API_BASE}/me`, { credentials: "include" });
+// Reads the admin-only session (separate cookie from the public site's
+// /me) so admin login state never bleeds into the fan-site.
+export async function fetchAdminMe(): Promise<AdminUser | null> {
+  const res = await fetch(`${API_BASE}/admin/me`, { credentials: "include" });
   if (res.status !== 200) return null;
   return (await res.json()) as AdminUser;
 }
@@ -177,7 +179,7 @@ export async function adminLogin(username: string, password: string): Promise<Ad
 }
 
 export function logout() {
-  return fetch(`${API_BASE}/auth/logout`, {
+  return fetch(`${API_BASE}/admin/logout`, {
     method: "POST",
     credentials: "include",
   });
