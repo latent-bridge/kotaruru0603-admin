@@ -122,6 +122,7 @@ export function forceOffline(siteId = SITE_ID) {
 export type ChatMessage = {
   id: string;
   author: string;
+  tag: string | null;
   content: string;
   timestamp: number;
 };

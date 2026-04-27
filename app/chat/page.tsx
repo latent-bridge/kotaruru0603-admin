@@ -176,6 +176,15 @@ export default function ChatPage() {
                 <div style={{ flex: 1, minWidth: 0, opacity: isHidden ? 0.55 : 1 }}>
                   <div style={{ fontSize: 11, color: PALETTE.inkDim, marginBottom: 3 }}>
                     <strong style={{ color: PALETTE.ink }}>{m.author}</strong>
+                    {m.tag && (
+                      <span style={{
+                        marginLeft: 4,
+                        fontFamily: "ui-monospace, monospace",
+                        fontSize: 10,
+                        color: PALETTE.inkDim,
+                        fontWeight: 400,
+                      }}>#{m.tag}</span>
+                    )}
                     {" · "}
                     {new Date(m.timestamp).toLocaleTimeString("ja-JP")}
                     {action && (
