@@ -2,12 +2,12 @@
 html, body { margin: 0; padding: 0; }
 body {
   font-family: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Segoe UI", sans-serif;
-  background: #f5f5f7;
-  color: #1d1d1f;
+  background: #fdf3ea;
+  color: #3a2e2a;
   font-size: 14px;
   line-height: 1.5;
 }
-a { color: #0066cc; text-decoration: none; }
+a { color: #d06a7e; text-decoration: none; }
 a:hover { text-decoration: underline; }
 button {
   font: inherit;
@@ -15,12 +15,90 @@ button {
 }
 input, select, textarea {
   font: inherit;
-  padding: 6px 10px;
-  border: 1px solid #d2d2d7;
-  border-radius: 6px;
-  background: #fff;
+  padding: 8px 12px;
+  border: 1.5px solid rgba(58,46,42,0.22);
+  border-radius: 10px;
+  background: #fffaf3;
+  color: #3a2e2a;
 }
 input:focus, select:focus, textarea:focus {
-  outline: 2px solid #0066cc40;
-  border-color: #0066cc;
+  outline: 2px solid rgba(208,106,126,0.3);
+  border-color: #d06a7e;
+}
+::placeholder { color: rgba(58,46,42,0.4); }
+
+/* ─── Responsive helpers (admin layout) ──────────────────────────────── */
+
+/* Header: nav wraps below logo on narrow viewports, user info shrinks. */
+.admin-header {
+  flex-wrap: wrap;
+  row-gap: 8px;
+  padding: 10px 16px !important;
+  height: auto !important;
+  min-height: 60px;
+}
+.admin-header-user-tag { display: inline; }
+@media (max-width: 520px) {
+  .admin-header-user-tag { display: none; }
+}
+
+/* Schedule day-card: 6-col on desktop, single-column stack on phones. */
+.schedule-card {
+  display: grid;
+  gap: 10px 12px;
+  align-items: start;
+  grid-template-columns: 84px 1fr 1fr 150px 76px 32px;
+}
+.schedule-card .sc-date { grid-column: auto; text-align: center; }
+.schedule-card .sc-main { grid-column: auto; display: flex; flex-direction: column; gap: 6px; }
+.schedule-card .sc-aux  { grid-column: auto; display: flex; flex-direction: column; gap: 6px; }
+.schedule-card .sc-cat  { grid-column: auto; }
+.schedule-card .sc-emoji{ grid-column: auto; }
+.schedule-card .sc-clear{ grid-column: auto; justify-self: end; }
+
+@media (max-width: 820px) {
+  .schedule-card {
+    grid-template-columns: 64px 1fr auto;
+    grid-template-areas:
+      "date main clear"
+      "date aux  aux"
+      "date cat  emoji";
+  }
+  .schedule-card .sc-date  { grid-area: date; }
+  .schedule-card .sc-main  { grid-area: main; }
+  .schedule-card .sc-aux   { grid-area: aux; }
+  .schedule-card .sc-cat   { grid-area: cat; }
+  .schedule-card .sc-emoji { grid-area: emoji; justify-self: end; max-width: 80px; }
+  .schedule-card .sc-clear { grid-area: clear; }
+}
+@media (max-width: 480px) {
+  .schedule-card {
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "date  clear"
+      "main  main"
+      "aux   aux"
+      "cat   emoji";
+  }
+  .schedule-card .sc-date  { text-align: left; }
+}
+
+/* Chat: action buttons wrap under message body when narrow. */
+@media (max-width: 520px) {
+  .chat-message {
+    flex-wrap: wrap;
+  }
+  .chat-message-actions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+}
+
+/* Live page metadata grid: stack labels above values on mobile. */
+@media (max-width: 520px) {
+  .live-meta {
+    grid-template-columns: 1fr !important;
+  }
+  .live-meta dt { padding-bottom: 0; }
+  .live-meta dd { margin-bottom: 6px !important; }
 }

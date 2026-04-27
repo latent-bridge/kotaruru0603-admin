@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Shell } from "@/components/Shell";
+import { PALETTE, RADIUS } from "@/lib/design";
 import {
   forceOffline,
   getLiveState,
@@ -11,11 +12,11 @@ import {
 } from "@/lib/api";
 
 const POLL_STATE_LABEL: Record<string, { label: string; color: string }> = {
-  active: { label: "ポーリング中", color: "#22aa55" },
-  stopped_ended: { label: "正常終了 (検知)", color: "#888" },
-  stopped_manual: { label: "手動停止", color: "#888" },
-  stopped_timeout: { label: "ポーリング上限到達 (12h超)", color: "#cc6600" },
-  stopped_errors: { label: "ポーリング停止 (連続エラー)", color: "#cc0000" },
+  active: { label: "見守り中", color: "#5a8870" },
+  stopped_ended: { label: "正常終了", color: PALETTE.inkDim },
+  stopped_manual: { label: "手動停止", color: PALETTE.inkDim },
+  stopped_timeout: { label: "見守り上限 (12h超)", color: "#c26a50" },
+  stopped_errors: { label: "エラー連続で停止", color: "#9a3a52" },
 };
 
 function formatDuration(ms: number) {
@@ -120,85 +121,70 @@ export default function LivePage() {
   const isLive = state?.status === "live";
   const pollMeta = state?.poll_state ? POLL_STATE_LABEL[state.poll_state] : null;
 
+  const isErr = message?.includes("失敗") || message?.includes("エラー") || message?.includes("見つかり");
+
   return (
     <Shell>
-      <h1 style={{ fontSize: 22, margin: "0 0 16px" }}>ライブ配信</h1>
+      <h1 style={{ fontSize: 24, margin: "0 0 4px", color: PALETTE.ink }}>らいぶ配信</h1>
+      <p style={{ margin: "0 0 16px", fontSize: 12, color: PALETTE.inkDim }}>
+        YouTube の配信を サイトの「LIVE NOW」へ切り替え
+      </p>
 
       {message && (
-        <div
-          style={{
-            padding: 12,
-            background: message.includes("失敗") || message.includes("エラー") ? "#fff0f0" : "#f0f9ff",
-            border: `1px solid ${message.includes("失敗") || message.includes("エラー") ? "#ffcccc" : "#cce5ff"}`,
-            borderRadius: 6,
-            marginBottom: 16,
-            fontSize: 13,
-          }}
-        >
-          {message}
-        </div>
+        <div style={{
+          padding: 12,
+          background: isErr ? "#fbe0e4" : "#d6e6d8",
+          border: `1.5px solid ${isErr ? "#c25470" : "#5a8870"}`,
+          color: isErr ? "#9a3a52" : "#3a5a4a",
+          borderRadius: RADIUS.md,
+          marginBottom: 16,
+          fontSize: 13,
+        }}>{message}</div>
       )}
 
-      <div
-        style={{
-          background: "#fff",
-          border: "1px solid #e5e5e7",
-          borderRadius: 10,
-          padding: 20,
-          marginBottom: 20,
-        }}
-      >
+      <div style={card}>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
-          <span
-            style={{
-              width: 12,
-              height: 12,
-              borderRadius: "50%",
-              background: isLive ? "#cc0000" : "#999",
-              boxShadow: isLive ? "0 0 0 4px #cc000020" : undefined,
-            }}
-          />
-          <strong style={{ fontSize: 18 }}>
+          <span style={{
+            width: 14,
+            height: 14,
+            borderRadius: "50%",
+            background: isLive ? "#c25470" : PALETTE.inkSoft,
+            boxShadow: isLive ? "0 0 0 5px rgba(194,84,112,0.18)" : undefined,
+          }} />
+          <strong style={{ fontSize: 18, color: PALETTE.ink }}>
             {isLive ? "LIVE NOW" : "OFFLINE"}
           </strong>
           {state?.video_id && (
-            <a
-              href={`https://www.youtube.com/watch?v=${state.video_id}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ fontSize: 12, marginLeft: 8 }}
-            >
-              {state.video_id} ↗
-            </a>
+            <a href={`https://www.youtube.com/watch?v=${state.video_id}`}
+              target="_blank" rel="noopener noreferrer"
+              style={{ fontSize: 12, marginLeft: 8 }}>{state.video_id} ↗</a>
           )}
         </div>
 
-        <dl style={{ display: "grid", gridTemplateColumns: "150px 1fr", gap: "8px 16px", margin: 0, fontSize: 13 }}>
-          <dt style={{ color: "#666" }}>開始時刻</dt>
-          <dd style={{ margin: 0 }}>
+        <dl className="live-meta" style={{ display: "grid", gridTemplateColumns: "120px 1fr", gap: "10px 16px", margin: 0, fontSize: 13 }}>
+          <dt style={{ color: PALETTE.inkDim }}>開始</dt>
+          <dd style={{ margin: 0, color: PALETTE.ink }}>
             {state?.started_at ? new Date(state.started_at).toLocaleString("ja-JP") : "—"}
             {state?.started_at && isLive && (
-              <span style={{ marginLeft: 8, color: "#666" }}>
+              <span style={{ marginLeft: 8, color: PALETTE.inkDim }}>
                 (経過 {formatDuration(Date.now() - state.started_at)})
               </span>
             )}
           </dd>
-          <dt style={{ color: "#666" }}>終了時刻</dt>
-          <dd style={{ margin: 0 }}>
+          <dt style={{ color: PALETTE.inkDim }}>終了</dt>
+          <dd style={{ margin: 0, color: PALETTE.ink }}>
             {state?.ended_at ? new Date(state.ended_at).toLocaleString("ja-JP") : "—"}
             {state?.end_reason && (
-              <span style={{ marginLeft: 8, color: "#666" }}>(理由: {state.end_reason})</span>
+              <span style={{ marginLeft: 8, color: PALETTE.inkDim }}>(理由: {state.end_reason})</span>
             )}
           </dd>
-          <dt style={{ color: "#666" }}>ポーリング</dt>
+          <dt style={{ color: PALETTE.inkDim }}>見守り</dt>
           <dd style={{ margin: 0 }}>
             {pollMeta ? (
-              <span style={{ color: pollMeta.color }}>{pollMeta.label}</span>
-            ) : (
-              "—"
-            )}
+              <span style={{ color: pollMeta.color, fontWeight: 600 }}>{pollMeta.label}</span>
+            ) : <span style={{ color: PALETTE.inkDim }}>—</span>}
             {state?.last_polled_at && (
-              <span style={{ marginLeft: 8, color: "#666" }}>
+              <span style={{ marginLeft: 8, color: PALETTE.inkDim }}>
                 最終 {formatRelative(state.last_polled_at)}
               </span>
             )}
@@ -207,87 +193,70 @@ export default function LivePage() {
       </div>
 
       {!isLive ? (
-        <div
-          style={{
-            background: "#fff",
-            border: "1px solid #e5e5e7",
-            borderRadius: 10,
-            padding: 20,
-          }}
-        >
-          <h2 style={{ fontSize: 16, margin: "0 0 12px" }}>配信を開始</h2>
-          <p style={{ fontSize: 13, color: "#666", margin: "0 0 12px" }}>
-            YouTube Studio で配信を開始してから [ライブ配信開始] を押してください。動画 ID は YouTube API から自動取得します。
+        <div style={card}>
+          <h2 style={{ fontSize: 16, margin: "0 0 8px", color: PALETTE.ink }}>配信を始める</h2>
+          <p style={{ fontSize: 13, color: PALETTE.inkDim, margin: "0 0 14px" }}>
+            YouTube Studio で配信を始めてから下のボタンを押してね。動画 ID は自動で取ってきます。
           </p>
-          <div style={{ display: "flex", gap: 8, alignItems: "center", marginBottom: 12 }}>
+          <details style={{ marginBottom: 14, fontSize: 12, color: PALETTE.inkDim }}>
+            <summary style={{ cursor: "pointer" }}>動画 ID を手で指定する (上手くいかないとき)</summary>
             <input
-              placeholder="(任意) 動画 ID を手動指定"
+              placeholder="例: dQw4w9WgXcQ"
               value={manualVideoId}
               onChange={(e) => setManualVideoId(e.target.value)}
-              style={{ flex: 1, fontFamily: "ui-monospace, monospace" }}
+              style={{ marginTop: 8, width: "100%", fontFamily: "ui-monospace, monospace" }}
             />
-          </div>
-          <button
-            onClick={onStart}
-            disabled={busy !== null}
-            style={{
-              padding: "12px 24px",
-              background: busy === "start" ? "#999" : "#cc0000",
-              color: "#fff",
-              border: "none",
-              borderRadius: 6,
-              fontWeight: 600,
-              fontSize: 15,
-            }}
-          >
-            {busy === "start" ? "起動中…" : "🔴 ライブ配信開始"}
+          </details>
+          <button onClick={onStart} disabled={busy !== null} style={{
+            padding: "14px 28px",
+            background: busy === "start" ? PALETTE.inkDim : PALETTE.accent,
+            color: "#fff",
+            border: "none",
+            borderRadius: RADIUS.md,
+            fontWeight: 700,
+            fontSize: 15,
+          }}>
+            {busy === "start" ? "起動中…" : "🔴 ライブ配信を始める"}
           </button>
         </div>
       ) : (
-        <div
-          style={{
-            background: "#fff",
-            border: "1px solid #e5e5e7",
-            borderRadius: 10,
-            padding: 20,
-          }}
-        >
-          <h2 style={{ fontSize: 16, margin: "0 0 12px" }}>配信中の操作</h2>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button
-              onClick={onStop}
-              disabled={busy !== null}
-              style={{
-                padding: "10px 20px",
-                background: "#fff",
-                color: "#1d1d1f",
-                border: "1px solid #d2d2d7",
-                borderRadius: 6,
-                fontWeight: 600,
-              }}
-            >
-              {busy === "stop" ? "終了処理中…" : "終了"}
+        <div style={card}>
+          <h2 style={{ fontSize: 16, margin: "0 0 12px", color: PALETTE.ink }}>配信中の操作</h2>
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            <button onClick={onStop} disabled={busy !== null} style={{
+              padding: "12px 22px",
+              background: PALETTE.paper,
+              color: PALETTE.ink,
+              border: `1.5px solid ${PALETTE.inkBorder}`,
+              borderRadius: RADIUS.md,
+              fontWeight: 700,
+            }}>
+              {busy === "stop" ? "終了中…" : "終了する"}
             </button>
-            <button
-              onClick={onForceOffline}
-              disabled={busy !== null}
-              style={{
-                padding: "10px 20px",
-                background: "#fff",
-                color: "#cc0000",
-                border: "1px solid #cc0000",
-                borderRadius: 6,
-                fontWeight: 600,
-              }}
-            >
+            <button onClick={onForceOffline} disabled={busy !== null} style={{
+              padding: "12px 22px",
+              background: PALETTE.paper,
+              color: "#9a3a52",
+              border: `1.5px solid #c25470`,
+              borderRadius: RADIUS.md,
+              fontWeight: 700,
+            }}>
               {busy === "force" ? "実行中…" : "強制 OFFLINE"}
             </button>
           </div>
-          <p style={{ fontSize: 12, color: "#666", marginTop: 12, marginBottom: 0 }}>
-            通常は [終了] を使ってください。配信終了は YouTube が `actualEndTime` を返した時点で自動で OFFLINE になります (最大 2 分遅延)。
+          <p style={{ fontSize: 12, color: PALETTE.inkDim, marginTop: 14, marginBottom: 0 }}>
+            通常は [終了する] を押してね。YouTube が配信終了を返した時点で自動で OFFLINE になります (最大 2 分の遅延)。
           </p>
         </div>
       )}
     </Shell>
   );
 }
+
+const card: React.CSSProperties = {
+  background: PALETTE.paper,
+  border: `1.5px solid ${PALETTE.inkSoft}`,
+  borderRadius: RADIUS.lg,
+  padding: 22,
+  marginBottom: 16,
+};

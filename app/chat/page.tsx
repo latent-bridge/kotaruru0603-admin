@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Shell } from "@/components/Shell";
+import { PALETTE, RADIUS } from "@/lib/design";
 import {
   API_BASE,
   SITE_ID,
@@ -116,32 +117,43 @@ export default function ChatPage() {
 
   return (
     <Shell>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 16 }}>
-        <h1 style={{ fontSize: 22, margin: 0 }}>チャットモデレーション</h1>
-        <span style={{ fontSize: 12, color: "#666" }}>
-          SSE: {streamStatus === "connected" ? "🟢" : streamStatus === "error" ? "🔴" : "⏳"}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 16 }}>
+        <div>
+          <h1 style={{ fontSize: 24, margin: 0, color: PALETTE.ink }}>ちゃっと</h1>
+          <p style={{ margin: "4px 0 0", fontSize: 12, color: PALETTE.inkDim }}>
+            ファンサイトに表示中のメッセージを管理
+          </p>
+        </div>
+        <span style={{ fontSize: 12, color: PALETTE.inkDim }}>
+          {streamStatus === "connected" ? "🟢 つながってます" : streamStatus === "error" ? "🔴 切断" : "⏳ 接続中"}
         </span>
       </div>
 
       {error && (
-        <div style={{ padding: 12, background: "#fff0f0", border: "1px solid #ffcccc", borderRadius: 6, marginBottom: 16, fontSize: 13 }}>
-          {error}
-        </div>
+        <div style={{
+          padding: 12,
+          background: "#fbe0e4",
+          border: `1.5px solid #c25470`,
+          color: "#9a3a52",
+          borderRadius: RADIUS.md,
+          marginBottom: 16,
+          fontSize: 13,
+        }}>{error}</div>
       )}
 
       <div
         ref={messagesRef}
         style={{
-          background: "#fff",
-          border: "1px solid #e5e5e7",
-          borderRadius: 10,
+          background: PALETTE.paper,
+          border: `1.5px solid ${PALETTE.inkSoft}`,
+          borderRadius: RADIUS.lg,
           height: 600,
           overflowY: "auto",
-          padding: 8,
+          padding: 12,
         }}
       >
         {messages.length === 0 ? (
-          <p style={{ color: "#999", textAlign: "center", padding: 40 }}>
+          <p style={{ color: PALETTE.inkDim, textAlign: "center", padding: 60 }}>
             (まだメッセージがありません)
           </p>
         ) : (
@@ -151,59 +163,60 @@ export default function ChatPage() {
             return (
               <div
                 key={m.id}
+                className="chat-message"
                 style={{
                   display: "flex",
                   alignItems: "flex-start",
                   gap: 8,
-                  padding: "8px 10px",
-                  borderBottom: "1px solid #f5f5f7",
-                  background: isHidden ? "#fafafa" : "transparent",
+                  padding: "10px 12px",
+                  borderBottom: `1px solid ${PALETTE.inkSoft}`,
+                  background: isHidden ? "rgba(58,46,42,0.04)" : "transparent",
                   opacity: isHidden ? 0.55 : 1,
                 }}
               >
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 11, color: "#666", marginBottom: 2 }}>
-                    <strong style={{ color: "#1d1d1f" }}>{m.author}</strong>
+                  <div style={{ fontSize: 11, color: PALETTE.inkDim, marginBottom: 3 }}>
+                    <strong style={{ color: PALETTE.ink }}>{m.author}</strong>
                     {" · "}
                     {new Date(m.timestamp).toLocaleTimeString("ja-JP")}
                     {action && (
-                      <span style={{ marginLeft: 6, color: action === "delete" ? "#cc0000" : "#cc6600" }}>
-                        [{action === "delete" ? "削除済" : "非表示"}]
-                      </span>
+                      <span style={{
+                        marginLeft: 8,
+                        padding: "1px 8px",
+                        borderRadius: 999,
+                        background: action === "delete" ? "#fbe0e4" : "#fad8c8",
+                        color: action === "delete" ? "#9a3a52" : "#c26a50",
+                        fontSize: 10,
+                        fontWeight: 700,
+                      }}>{action === "delete" ? "削除済" : "非表示"}</span>
                     )}
                   </div>
-                  <div style={{ wordBreak: "break-word" }}>{m.content}</div>
+                  <div style={{ wordBreak: "break-word", color: PALETTE.ink }}>{m.content}</div>
                 </div>
-                <div style={{ display: "flex", gap: 4, flexShrink: 0 }}>
+                <div className="chat-message-actions" style={{ display: "flex", gap: 6, flexShrink: 0 }}>
                   {!isHidden && (
                     <>
                       <button
                         onClick={() => withBusy(m.id, () => hideMessage(m.id))}
                         disabled={busy.has(m.id)}
-                        style={btnStyle("#cc6600")}
-                      >
-                        非表示
-                      </button>
+                        style={btnStyle("#c26a50", "#fad8c8")}
+                      >非表示</button>
                       <button
                         onClick={() => {
                           if (!confirm(`このメッセージを Discord からも削除します。よろしいですか？\n\n${m.content}`)) return;
                           withBusy(m.id, () => deleteMessage(m.id));
                         }}
                         disabled={busy.has(m.id)}
-                        style={btnStyle("#cc0000")}
-                      >
-                        削除
-                      </button>
+                        style={btnStyle("#9a3a52", "#fbe0e4")}
+                      >削除</button>
                     </>
                   )}
                   {action === "hide" && (
                     <button
                       onClick={() => withBusy(m.id, () => unhideMessage(m.id))}
                       disabled={busy.has(m.id)}
-                      style={btnStyle("#0066cc")}
-                    >
-                      非表示解除
-                    </button>
+                      style={btnStyle(PALETTE.accent, PALETTE.paper)}
+                    >元に戻す</button>
                   )}
                 </div>
               </div>
@@ -215,13 +228,14 @@ export default function ChatPage() {
   );
 }
 
-function btnStyle(color: string): React.CSSProperties {
+function btnStyle(color: string, bg: string): React.CSSProperties {
   return {
-    padding: "4px 10px",
+    padding: "5px 12px",
     fontSize: 12,
-    background: "#fff",
+    background: bg,
     color,
-    border: `1px solid ${color}`,
-    borderRadius: 4,
+    border: `1.5px solid ${color}`,
+    borderRadius: 999,
+    fontWeight: 700,
   };
 }

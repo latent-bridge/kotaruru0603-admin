@@ -43,9 +43,7 @@ async function jsonRequest<T>(
 }
 
 export type ScheduleEntry = {
-  day: string;
-  weekday: string | null;
-  date_label: string | null;
+  date: string;       // YYYY-MM-DD (JST)
   title: string | null;
   time: string | null;
   category: string | null;
@@ -53,29 +51,32 @@ export type ScheduleEntry = {
   note: string | null;
 };
 
-export const ALLOWED_CATEGORIES = [
-  "おしゃべり",
-  "げーむ",
-  "おえかき",
-  "うた",
-  "おはなし",
-  "めんばー",
-  "おやすみ",
-] as const;
+export type ScheduleResponse = {
+  start: string;
+  end: string;
+  entries: ScheduleEntry[];
+};
 
-export function getSchedule(siteId = SITE_ID) {
-  return jsonRequest<{ entries: ScheduleEntry[] }>(
+export function getSchedule(days = 14, siteId = SITE_ID) {
+  return jsonRequest<ScheduleResponse>(
     "GET",
-    `/admin/schedule/${siteId}`,
+    `/admin/schedule/${siteId}?days=${days}`,
   );
 }
 
-export function putSchedule(entries: ScheduleEntry[], siteId = SITE_ID) {
+export function putSchedule(
+  start: string,
+  end: string,
+  entries: ScheduleEntry[],
+  siteId = SITE_ID,
+) {
   return jsonRequest<{
     ok: true;
+    start: string;
+    end: string;
     count: number;
     dispatch: { dispatched: boolean; reason?: string };
-  }>("PUT", `/admin/schedule/${siteId}`, { entries });
+  }>("PUT", `/admin/schedule/${siteId}`, { start, end, entries });
 }
 
 export type LiveState = {

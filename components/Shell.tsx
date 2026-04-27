@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useAdminAuth } from "@/lib/use-admin";
 import { adminLogin, logout } from "@/lib/api";
+import { PALETTE, RADIUS } from "@/lib/design";
 
 const NAV = [
   { href: "/schedule/", label: "スケジュール" },
@@ -32,7 +33,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
     return (
       <CenterMessage>
         <p>このアカウントには管理者権限がありません。</p>
-        <p style={{ color: "#666", fontSize: 12 }}>
+        <p style={{ color: PALETTE.inkDim, fontSize: 12 }}>
           ログイン中: {auth.user.display_name || "(未設定)"} #{auth.user.tag}
         </p>
         <button
@@ -40,13 +41,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             await logout();
             window.location.reload();
           }}
-          style={{
-            marginTop: 16,
-            padding: "8px 14px",
-            background: "#fff",
-            border: "1px solid #d2d2d7",
-            borderRadius: 6,
-          }}
+          style={secondaryBtn}
         >
           ログアウト
         </button>
@@ -55,20 +50,23 @@ export function Shell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div style={{ minHeight: "100vh" }}>
+    <div style={{ minHeight: "100vh", background: PALETTE.bg }}>
       <header
+        className="admin-header"
         style={{
-          background: "#fff",
-          borderBottom: "1px solid #e5e5e7",
+          background: PALETTE.paper,
+          borderBottom: `1px solid ${PALETTE.inkSoft}`,
           padding: "0 24px",
           display: "flex",
           alignItems: "center",
-          height: 56,
-          gap: 24,
+          height: 60,
+          gap: 16,
         }}
       >
-        <strong style={{ fontSize: 15 }}>kotaruru0603 admin</strong>
-        <nav style={{ display: "flex", gap: 4, flex: 1 }}>
+        <strong style={{ fontSize: 15, color: PALETTE.ink }}>
+          🍡 kotaruru0603 admin
+        </strong>
+        <nav style={{ display: "flex", gap: 6, flex: 1 }}>
           {NAV.map((n) => {
             const active = pathname?.startsWith(n.href);
             return (
@@ -76,11 +74,12 @@ export function Shell({ children }: { children: React.ReactNode }) {
                 key={n.href}
                 href={n.href}
                 style={{
-                  padding: "8px 14px",
-                  borderRadius: 6,
-                  color: active ? "#0066cc" : "#1d1d1f",
-                  background: active ? "#0066cc15" : "transparent",
-                  fontWeight: active ? 600 : 400,
+                  padding: "8px 16px",
+                  borderRadius: RADIUS.md,
+                  color: active ? PALETTE.accent : PALETTE.ink,
+                  background: active ? "#fff" : "transparent",
+                  fontWeight: active ? 700 : 500,
+                  border: active ? `1.5px solid ${PALETTE.coral}` : "1.5px solid transparent",
                 }}
               >
                 {n.label}
@@ -89,32 +88,34 @@ export function Shell({ children }: { children: React.ReactNode }) {
           })}
         </nav>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <span style={{ color: "#666", fontSize: 12 }}>
-            {auth.user.display_name || "(無名)"} #{auth.user.tag}
+          <span className="admin-header-user-tag" style={{ color: PALETTE.inkDim, fontSize: 12 }}>
+            {auth.user.display_name || "admin"} #{auth.user.tag}
           </span>
           <button
             onClick={async () => {
               await logout();
               window.location.reload();
             }}
-            style={{
-              padding: "6px 12px",
-              background: "#fff",
-              border: "1px solid #d2d2d7",
-              borderRadius: 6,
-              fontSize: 12,
-            }}
+            style={{ ...secondaryBtn, padding: "6px 12px", fontSize: 12 }}
           >
             ログアウト
           </button>
         </div>
       </header>
-      <main style={{ padding: 24, maxWidth: 1100, margin: "0 auto" }}>
+      <main style={{ padding: "28px 24px 60px", maxWidth: 1100, margin: "0 auto" }}>
         {children}
       </main>
     </div>
   );
 }
+
+const secondaryBtn: React.CSSProperties = {
+  padding: "8px 14px",
+  background: PALETTE.paper,
+  border: `1.5px solid ${PALETTE.inkBorder}`,
+  borderRadius: RADIUS.md,
+  color: PALETTE.ink,
+};
 
 function CenterMessage({ children }: { children: React.ReactNode }) {
   return (
@@ -147,7 +148,6 @@ function LoginForm() {
     setError(null);
     try {
       await adminLogin(username, password);
-      // Cookie is set; reload re-runs useAdminAuth which now sees the session.
       window.location.reload();
     } catch (err) {
       const msg = (err as Error).message;
@@ -170,52 +170,40 @@ function LoginForm() {
       style={{
         display: "flex",
         flexDirection: "column",
-        gap: 12,
-        background: "#fff",
-        border: "1px solid #e5e5e7",
-        borderRadius: 10,
-        padding: 24,
-        minWidth: 320,
+        gap: 14,
+        background: PALETTE.paper,
+        border: `1.5px solid ${PALETTE.inkSoft}`,
+        borderRadius: RADIUS.lg,
+        padding: 28,
+        minWidth: 340,
         textAlign: "left",
       }}
     >
-      <h1 style={{ fontSize: 18, margin: 0, textAlign: "center" }}>管理画面ログイン</h1>
-      <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 12 }}>
+      <h1 style={{ fontSize: 20, margin: 0, textAlign: "center", color: PALETTE.ink }}>
+        🍡 ろぐいん
+      </h1>
+      <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 12, color: PALETTE.inkDim }}>
         ユーザー名
-        <input
-          type="text"
-          autoComplete="username"
-          value={username}
-          onChange={(e) => setUsername(e.target.value)}
-          required
-        />
+        <input type="text" autoComplete="username" value={username}
+          onChange={(e) => setUsername(e.target.value)} required />
       </label>
-      <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 12 }}>
+      <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 12, color: PALETTE.inkDim }}>
         パスワード
-        <input
-          type="password"
-          autoComplete="current-password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-        />
+        <input type="password" autoComplete="current-password" value={password}
+          onChange={(e) => setPassword(e.target.value)} required />
       </label>
       {error && (
-        <div style={{ fontSize: 12, color: "#cc0000" }}>{error}</div>
+        <div style={{ fontSize: 12, color: PALETTE.accent }}>{error}</div>
       )}
-      <button
-        type="submit"
-        disabled={busy}
-        style={{
-          padding: "10px 18px",
-          background: busy ? "#999" : "#0066cc",
-          color: "#fff",
-          border: "none",
-          borderRadius: 6,
-          fontWeight: 600,
-        }}
-      >
-        {busy ? "ログイン中…" : "ログイン"}
+      <button type="submit" disabled={busy} style={{
+        padding: "12px 20px",
+        background: busy ? PALETTE.inkDim : PALETTE.accent,
+        color: "#fff",
+        border: "none",
+        borderRadius: RADIUS.md,
+        fontWeight: 700,
+      }}>
+        {busy ? "ろぐいん中…" : "ろぐいん"}
       </button>
     </form>
   );
