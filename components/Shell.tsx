@@ -64,7 +64,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
         }}
       >
         <strong style={{ fontSize: 15, color: PALETTE.ink }}>
-          🍡 kotaruru0603 admin
+          kotaruru0603 admin
         </strong>
         <nav style={{ display: "flex", gap: 6, flex: 1 }}>
           {NAV.map((n) => {
@@ -180,7 +180,7 @@ function LoginForm() {
       }}
     >
       <h1 style={{ fontSize: 20, margin: 0, textAlign: "center", color: PALETTE.ink }}>
-        🍡 ろぐいん
+        管理画面ログイン
       </h1>
       <label style={{ display: "flex", flexDirection: "column", gap: 4, fontSize: 12, color: PALETTE.inkDim }}>
         ユーザー名
@@ -203,7 +203,7 @@ function LoginForm() {
         borderRadius: RADIUS.md,
         fontWeight: 700,
       }}>
-        {busy ? "ろぐいん中…" : "ろぐいん"}
+        {busy ? "ログイン中…" : "ログイン"}
       </button>
     </form>
   );

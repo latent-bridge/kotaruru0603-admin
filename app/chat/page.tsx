@@ -119,13 +119,13 @@ export default function ChatPage() {
     <Shell>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 16 }}>
         <div>
-          <h1 style={{ fontSize: 24, margin: 0, color: PALETTE.ink }}>ちゃっと</h1>
+          <h1 style={{ fontSize: 24, margin: 0, color: PALETTE.ink }}>チャット</h1>
           <p style={{ margin: "4px 0 0", fontSize: 12, color: PALETTE.inkDim }}>
             ファンサイトに表示中のメッセージを管理
           </p>
         </div>
         <span style={{ fontSize: 12, color: PALETTE.inkDim }}>
-          {streamStatus === "connected" ? "🟢 つながってます" : streamStatus === "error" ? "🔴 切断" : "⏳ 接続中"}
+          {streamStatus === "connected" ? "🟢 接続中" : streamStatus === "error" ? "🔴 切断" : "⏳ 接続中…"}
         </span>
       </div>
 

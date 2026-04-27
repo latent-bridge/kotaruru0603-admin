@@ -5,10 +5,16 @@ import { Shell } from "@/components/Shell";
 import { CATEGORY_COLOR, CATEGORY_OPTIONS, PALETTE, RADIUS, type Category } from "@/lib/design";
 import { getSchedule, putSchedule, type ScheduleEntry } from "@/lib/api";
 
-// 14 days today through today+13. Bumping this constant is the only change
-// needed to extend the admin to a monthly view; the backend already accepts
-// any range up to 90 days.
-const RANGE_DAYS = 14;
+// 14 days today through today+13, split into 2 tabs of 7 days each. Adding
+// "再来週" later is just adding another tab entry below; the backend already
+// accepts any range up to 90 days.
+const TAB_DAYS = 7;
+const TABS = [
+  { key: "this", label: "今週", offset: 0, sub: "今日から1週間" },
+  { key: "next", label: "翌週", offset: TAB_DAYS, sub: "1週間後から" },
+] as const;
+type TabKey = (typeof TABS)[number]["key"];
+const RANGE_DAYS = TABS.length * TAB_DAYS;
 
 const WEEKDAY_JP = ["日", "月", "火", "水", "木", "金", "土"];
 
@@ -64,6 +70,7 @@ export default function SchedulePage() {
   const [days, setDays] = useState<DayState[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [tab, setTab] = useState<TabKey>("this");
   const [message, setMessage] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
 
   const load = useCallback(async () => {
@@ -80,8 +87,8 @@ export default function SchedulePage() {
         const d = Number.parseInt(iso.slice(8, 10), 10);
         const monthDay = `${m}/${d}`;
         let label: string;
-        if (iso === todayIso) label = "きょう";
-        else if (iso === tomorrowIso) label = "あした";
+        if (iso === todayIso) label = "今日";
+        else if (iso === tomorrowIso) label = "明日";
         else label = monthDay;
         const stored = byDate.get(iso);
         const entry: ScheduleEntry = stored ?? buildEmptyEntry(iso);
@@ -154,18 +161,55 @@ export default function SchedulePage() {
     }
   };
 
+  // Per-tab content count (number of days with at least one filled field) so
+  // ruru can see at a glance which week needs attention.
+  const tabCounts = useMemo(() => {
+    const counts: Record<TabKey, number> = { this: 0, next: 0 };
+    TABS.forEach((t) => {
+      counts[t.key] = days
+        .slice(t.offset, t.offset + TAB_DAYS)
+        .filter((d) => d.hasContent).length;
+    });
+    return counts;
+  }, [days]);
+
+  const activeTab = TABS.find((t) => t.key === tab) ?? TABS[0];
+  const visibleDays = days.slice(activeTab.offset, activeTab.offset + TAB_DAYS);
+  const visibleStartIdx = activeTab.offset;
+
   return (
     <Shell>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 8, gap: 12, flexWrap: "wrap" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: 12, gap: 12, flexWrap: "wrap" }}>
         <div>
-          <h1 style={{ fontSize: 24, margin: 0, color: PALETTE.ink }}>すけじゅーる</h1>
+          <h1 style={{ fontSize: 24, margin: 0, color: PALETTE.ink }}>スケジュール</h1>
           <p style={{ margin: "4px 0 0", fontSize: 12, color: PALETTE.inkDim }}>
-            きょうから {RANGE_DAYS} にちぶん
+            今日から {RANGE_DAYS} 日間の予定を編集できます
           </p>
         </div>
         <button onClick={save} disabled={saving || loading} style={primaryBtn(saving)}>
-          {saving ? "保存中…" : "ほぞんして公開"}
+          {saving ? "保存中…" : "保存して公開"}
         </button>
+      </div>
+
+      <div role="tablist" style={tabBarStyle}>
+        {TABS.map((t) => {
+          const active = t.key === tab;
+          return (
+            <button
+              key={t.key}
+              role="tab"
+              aria-selected={active}
+              onClick={() => setTab(t.key)}
+              style={tabButtonStyle(active)}
+            >
+              <span style={{ fontWeight: 700 }}>{t.label}</span>
+              {tabCounts[t.key] > 0 && (
+                <span style={tabBadge(active)}>{tabCounts[t.key]}</span>
+              )}
+              <span style={tabSubLabel}>{t.sub}</span>
+            </button>
+          );
+        })}
       </div>
 
       {message && (
@@ -176,12 +220,12 @@ export default function SchedulePage() {
         <p style={{ color: PALETTE.inkDim }}>読み込み中…</p>
       ) : (
         <div style={{ display: "flex", flexDirection: "column", gap: 12, marginTop: 16 }}>
-          {days.map((d, idx) => (
+          {visibleDays.map((d, i) => (
             <DayCard
               key={d.date}
               dayState={d}
-              onChange={(k, v) => update(idx, k, v)}
-              onClear={() => clear(idx)}
+              onChange={(k, v) => update(visibleStartIdx + i, k, v)}
+              onClear={() => clear(visibleStartIdx + i)}
             />
           ))}
         </div>
@@ -189,6 +233,47 @@ export default function SchedulePage() {
     </Shell>
   );
 }
+
+const tabBarStyle: React.CSSProperties = {
+  display: "flex",
+  gap: 8,
+  marginBottom: 4,
+  flexWrap: "wrap",
+};
+
+function tabButtonStyle(active: boolean): React.CSSProperties {
+  return {
+    flex: "1 1 180px",
+    padding: "10px 16px",
+    background: active ? PALETTE.paper : "transparent",
+    color: active ? PALETTE.ink : PALETTE.inkDim,
+    border: `1.5px solid ${active ? PALETTE.coral : PALETTE.inkSoft}`,
+    borderRadius: RADIUS.md,
+    display: "flex",
+    alignItems: "center",
+    gap: 8,
+    textAlign: "left",
+    fontSize: 14,
+  };
+}
+
+function tabBadge(active: boolean): React.CSSProperties {
+  return {
+    padding: "1px 8px",
+    background: active ? PALETTE.coral : PALETTE.inkSoft,
+    color: active ? "#fff" : PALETTE.inkDim,
+    borderRadius: 999,
+    fontSize: 11,
+    fontWeight: 700,
+  };
+}
+
+const tabSubLabel: React.CSSProperties = {
+  marginLeft: "auto",
+  fontSize: 11,
+  color: PALETTE.inkDim,
+  fontWeight: 400,
+};
 
 function DayCard({
   dayState,
@@ -216,12 +301,12 @@ function DayCard({
     >
       <div className="sc-date">
         <div style={{ fontSize: 22, fontWeight: 700, color: PALETTE.ink }}>
-          {label === "きょう" || label === "あした" ? label : monthDay}
+          {label === "今日" || label === "明日" ? label : monthDay}
         </div>
         <div style={{ fontSize: 12, color: wkColor, marginTop: 2, fontWeight: 600 }}>
-          {WEEKDAY_JP[weekday]}よう
+          {WEEKDAY_JP[weekday]}曜日
         </div>
-        {label !== "きょう" && label !== "あした" && (
+        {label !== "今日" && label !== "明日" && (
           <div style={{ fontSize: 10, color: PALETTE.inkDim, marginTop: 2 }}>{monthDay}</div>
         )}
       </div>
@@ -243,7 +328,7 @@ function DayCard({
 
       <div className="sc-aux">
         <input
-          placeholder="じこく (例: よる 21:00 〜)"
+          placeholder="時刻 (例: 21:00 〜)"
           value={entry.time ?? ""}
           onChange={(e) => onChange("time", e.target.value)}
         />

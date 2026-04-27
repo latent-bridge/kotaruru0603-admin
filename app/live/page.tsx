@@ -125,9 +125,9 @@ export default function LivePage() {
 
   return (
     <Shell>
-      <h1 style={{ fontSize: 24, margin: "0 0 4px", color: PALETTE.ink }}>らいぶ配信</h1>
+      <h1 style={{ fontSize: 24, margin: "0 0 4px", color: PALETTE.ink }}>ライブ配信</h1>
       <p style={{ margin: "0 0 16px", fontSize: 12, color: PALETTE.inkDim }}>
-        YouTube の配信を サイトの「LIVE NOW」へ切り替え
+        YouTube の配信をサイトの「LIVE NOW」へ切り替え
       </p>
 
       {message && (
@@ -194,12 +194,12 @@ export default function LivePage() {
 
       {!isLive ? (
         <div style={card}>
-          <h2 style={{ fontSize: 16, margin: "0 0 8px", color: PALETTE.ink }}>配信を始める</h2>
+          <h2 style={{ fontSize: 16, margin: "0 0 8px", color: PALETTE.ink }}>配信を開始</h2>
           <p style={{ fontSize: 13, color: PALETTE.inkDim, margin: "0 0 14px" }}>
-            YouTube Studio で配信を始めてから下のボタンを押してね。動画 ID は自動で取ってきます。
+            YouTube Studio で配信を開始してから下のボタンを押してください。動画 ID は自動取得します。
           </p>
           <details style={{ marginBottom: 14, fontSize: 12, color: PALETTE.inkDim }}>
-            <summary style={{ cursor: "pointer" }}>動画 ID を手で指定する (上手くいかないとき)</summary>
+            <summary style={{ cursor: "pointer" }}>動画 ID を手動指定 (自動取得が失敗したとき)</summary>
             <input
               placeholder="例: dQw4w9WgXcQ"
               value={manualVideoId}
@@ -216,7 +216,7 @@ export default function LivePage() {
             fontWeight: 700,
             fontSize: 15,
           }}>
-            {busy === "start" ? "起動中…" : "🔴 ライブ配信を始める"}
+            {busy === "start" ? "起動中…" : "🔴 ライブ配信を開始"}
           </button>
         </div>
       ) : (
@@ -231,7 +231,7 @@ export default function LivePage() {
               borderRadius: RADIUS.md,
               fontWeight: 700,
             }}>
-              {busy === "stop" ? "終了中…" : "終了する"}
+              {busy === "stop" ? "終了処理中…" : "配信終了"}
             </button>
             <button onClick={onForceOffline} disabled={busy !== null} style={{
               padding: "12px 22px",
@@ -245,7 +245,7 @@ export default function LivePage() {
             </button>
           </div>
           <p style={{ fontSize: 12, color: PALETTE.inkDim, marginTop: 14, marginBottom: 0 }}>
-            通常は [終了する] を押してね。YouTube が配信終了を返した時点で自動で OFFLINE になります (最大 2 分の遅延)。
+            通常は [配信終了] を押してください。YouTube が配信終了を返した時点で自動的に OFFLINE になります (最大 2 分の遅延)。
           </p>
         </div>
       )}
