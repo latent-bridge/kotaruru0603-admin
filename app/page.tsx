@@ -7,7 +7,7 @@ import { Shell } from "@/components/Shell";
 export default function HomePage() {
   const router = useRouter();
   useEffect(() => {
-    router.replace("/schedule/");
+    router.replace("/live/");
   }, [router]);
 
   return (
