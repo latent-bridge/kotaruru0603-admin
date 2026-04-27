@@ -8,9 +8,9 @@ import { adminLogin, logout } from "@/lib/api";
 import { PALETTE, RADIUS } from "@/lib/design";
 
 const NAV = [
+  { href: "/live/", label: "ライブ配信" },
   { href: "/schedule/", label: "スケジュール" },
   { href: "/chat/", label: "チャット" },
-  { href: "/live/", label: "ライブ配信" },
 ];
 
 export function Shell({ children }: { children: React.ReactNode }) {
