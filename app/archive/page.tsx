@@ -469,17 +469,53 @@ function DetailModal({
     }
   };
 
+  const thumb = item.raw.thumbnails.medium || item.raw.thumbnails.default;
+  const ytUrl = `https://www.youtube.com/watch?v=${item.raw.videoId}`;
+
   return (
     <div onClick={onClose} style={modalBackdrop}>
       <div onClick={(e) => e.stopPropagation()} style={modalCard}>
-        <header style={{ marginBottom: 12 }}>
-          <h2 style={{ fontSize: 16, margin: 0, color: PALETTE.ink, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-            {item.raw.title}
-          </h2>
-          <p style={{ margin: "2px 0 0", fontSize: 11, color: PALETTE.inkDim }}>
-            {formatDate(item.raw.publishedAt)} · {item.raw.videoId}
-          </p>
+        <header style={{ marginBottom: 14, display: "flex", gap: 12, alignItems: "flex-start" }}>
+          <a href={ytUrl} target="_blank" rel="noopener noreferrer" style={{ flexShrink: 0 }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={thumb} alt="" style={{ width: 120, height: 68, objectFit: "cover", borderRadius: 6 }} />
+          </a>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <h2 style={{
+              fontSize: 15,
+              margin: 0,
+              color: PALETTE.ink,
+              lineHeight: 1.4,
+              wordBreak: "break-word",
+            }}>
+              {item.raw.title}
+            </h2>
+            <p style={{ margin: "6px 0 0", fontSize: 11, color: PALETTE.inkDim }}>
+              {formatDate(item.raw.publishedAt)} · {formatDuration(item.raw.durationSeconds)} · {formatViews(item.raw.viewCount)} views
+            </p>
+            <p style={{ margin: "2px 0 0", fontSize: 10, color: PALETTE.inkDim, fontFamily: "ui-monospace, monospace" }}>
+              {item.raw.videoId} · <a href={ytUrl} target="_blank" rel="noopener noreferrer">YouTube ↗</a>
+            </p>
+          </div>
         </header>
+
+        {item.raw.description && (
+          <details style={{ marginBottom: 14, fontSize: 12, color: PALETTE.inkDim }}>
+            <summary style={{ cursor: "pointer", color: PALETTE.ink }}>動画説明を表示</summary>
+            <div style={{
+              marginTop: 8,
+              padding: 10,
+              background: PALETTE.bg,
+              borderRadius: 8,
+              whiteSpace: "pre-wrap",
+              wordBreak: "break-word",
+              maxHeight: 200,
+              overflowY: "auto",
+              fontSize: 12,
+              color: PALETTE.ink,
+            }}>{item.raw.description}</div>
+          </details>
+        )}
 
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
           <Field label="カテゴリ" hint="未選択 = 自動推論">
