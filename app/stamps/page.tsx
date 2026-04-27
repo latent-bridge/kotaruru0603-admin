@@ -44,7 +44,7 @@ export default function StampsPage() {
       ) : (
         <>
           <Summary data={data} />
-          <Section title="DAU 過去 30 日" sub={`${data.today} まで`}>
+          <Section title="日別の参加者" sub={`過去 30 日 (${data.today} まで)`}>
             <DauChart dau={data.dau} />
           </Section>
           <Section title={`上位ファン ${data.top.length} 名`}>
