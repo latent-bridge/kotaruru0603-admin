@@ -12,6 +12,7 @@ const NAV = [
   { href: "/schedule/", label: "スケジュール" },
   { href: "/archive/", label: "アーカイブ" },
   { href: "/chat/", label: "チャット" },
+  { href: "/stamps/", label: "スタンプ" },
 ];
 
 export function Shell({ children }: { children: React.ReactNode }) {

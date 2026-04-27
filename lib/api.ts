@@ -256,6 +256,38 @@ export function refreshArchiveFromYouTube(siteId = SITE_ID) {
   );
 }
 
+// ─── Stamps ──────────────────────────────────────────────────────────────
+
+export type StampTopFan = {
+  user_id: string;
+  display_name: string;
+  tag: string;
+  total_stamps: number;
+  completed_cards: number;
+  last_stamp_date: string | null;
+  claimed_today: boolean;
+  current_streak: number;
+  longest_streak: number;
+};
+
+export type StampSummary = {
+  card_size: number;
+  today: string;
+  registered_users: number;
+  stamp_users: number;
+  active_today: number;
+  active_7d: number;
+  total_stamps: number;
+  completed_cards: number;
+  dau: { date: string; users: number }[];
+  top: StampTopFan[];
+  histogram: { label: string; count: number }[];
+};
+
+export function fetchStampSummary(siteId = SITE_ID) {
+  return jsonRequest<StampSummary>("GET", `/admin/stamps/${siteId}/summary`);
+}
+
 // Admin variant returns ALL messages (including hidden / deleted) so the
 // moderator can see what they've acted on. Public /chat/:siteId/messages
 // continues to filter for the fan site.

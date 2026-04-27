@@ -100,6 +100,13 @@ input:focus, select:focus, textarea:focus {
   }
 }
 
+/* Stamps summary cards: 4-up grid on desktop, wrap on small viewports. */
+.stamps-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 /* Live page metadata grid: stack labels above values on mobile. */
 @media (max-width: 520px) {
   .live-meta {
