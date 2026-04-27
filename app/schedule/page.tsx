@@ -433,7 +433,7 @@ function TagPicker({
       </div>
       <div style={{ display: "flex", gap: 6 }}>
         <input
-          placeholder="自由タグを追加 (例: コラボ)"
+          placeholder="自由タグを追加 (例: メンバー)"
           value={custom}
           onChange={(e) => setCustom(e.target.value)}
           onKeyDown={(e) => {

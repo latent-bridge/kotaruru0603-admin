@@ -29,17 +29,16 @@ export const CATEGORY_OPTIONS: readonly Category[] = [
   "おしゃべり", "げーむ", "おえかき", "うた", "おはなし", "めんばー", "おやすみ",
 ];
 
-// Suggested tags presented as chips in the admin. Free-form tags can also be
-// added — same display path on the public site (default color for unknown).
-export const PRESET_TAGS = CATEGORY_OPTIONS;
-
-// Common stream emojis surfaced as a one-tap palette. Free input still works
-// (kanji + arbitrary unicode), this is just the fast-path for the usual ones.
-export const EMOJI_PRESETS = [
-  "🎮", "🎙", "🎤", "🎨", "✎", "🤝",
-  "💤", "🎂", "✨", "💝", "🌷", "☕",
-  "🌙", "🐟", "⚔", "👻", "🍜", "🐱",
+// Suggested tags presented as chips in the admin. Decoupled from the archive's
+// Category enum since schedule tags are free-form (the user can add anything
+// beyond this set via the "+追加" input).
+export const PRESET_TAGS = [
+  "おしゃべり", "げーむ", "おえかき", "うた", "おはなし", "コラボ", "おやすみ",
 ] as const;
+
+// One-row emoji palette for the most common stream types. Free input handles
+// everything else.
+export const EMOJI_PRESETS = ["🎮", "🎙", "🎤", "🎨", "🤝", "💤", "☕", "✨"] as const;
 
 export const CATEGORY_COLOR: Record<Category, { color: string; bg: string }> = {
   おしゃべり: { color: "#c25470", bg: "#fbe0e4" },
@@ -51,9 +50,16 @@ export const CATEGORY_COLOR: Record<Category, { color: string; bg: string }> = {
   おやすみ:  { color: "rgba(58,46,42,0.55)", bg: "#f0e8df" },
 };
 
+// Schedule-tag color map. Includes the archive Category palette so shared
+// labels stay consistent, plus schedule-only labels like コラボ.
+const TAG_COLOR_OVERRIDES: Record<string, { color: string; bg: string }> = {
+  ...CATEGORY_COLOR,
+  コラボ: { color: "#c26a50", bg: "#fad8c8" },
+};
+
 const DEFAULT_TAG_COLOR = { color: "#857670", bg: "#f0e8df" };
 export function tagColor(tag: string): { color: string; bg: string } {
-  return (CATEGORY_COLOR as Record<string, { color: string; bg: string }>)[tag] ?? DEFAULT_TAG_COLOR;
+  return TAG_COLOR_OVERRIDES[tag] ?? DEFAULT_TAG_COLOR;
 }
 
 export const RADIUS = { sm: 8, md: 12, lg: 18, xl: 22 } as const;
