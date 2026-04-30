@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Shell } from "@/components/Shell";
 import { PALETTE, PRESET_TAGS, RADIUS, tagColor } from "@/lib/design";
-import { EmojiPicker } from "@/components/EmojiPicker";
+import { IconPicker } from "@/components/IconPicker";
 import { getSchedule, putSchedule, type ScheduleEntry } from "@/lib/api";
 
 // 14 days today through today+13, split into 2 tabs of 7 days each. Adding
@@ -347,7 +347,7 @@ function DayCard({
         <TagPicker tags={entry.tags} onToggle={toggleTag}
           onAdd={(t) => !entry.tags.includes(t) && onChange("tags", [...entry.tags, t])} />
 
-        <EmojiPicker value={entry.emoji ?? ""} onChange={(v) => onChange("emoji", v)} />
+        <IconPicker value={entry.emoji ?? ""} onChange={(v) => onChange("emoji", v)} />
       </div>
 
       <button
