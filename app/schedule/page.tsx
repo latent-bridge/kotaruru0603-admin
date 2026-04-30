@@ -2,7 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Shell } from "@/components/Shell";
-import { EMOJI_PRESETS, PALETTE, PRESET_TAGS, RADIUS, tagColor } from "@/lib/design";
+import { PALETTE, PRESET_TAGS, RADIUS, tagColor } from "@/lib/design";
+import { EmojiPicker } from "@/components/EmojiPicker";
 import { getSchedule, putSchedule, type ScheduleEntry } from "@/lib/api";
 
 // 14 days today through today+13, split into 2 tabs of 7 days each. Adding
@@ -458,51 +459,6 @@ function TagPicker({
             color: PALETTE.ink,
           }}
         >追加</button>
-      </div>
-    </div>
-  );
-}
-
-function EmojiPicker({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  return (
-    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-        <span style={{ fontSize: 11, color: PALETTE.inkDim, minWidth: 36 }}>絵文字</span>
-        <input
-          placeholder="🎮"
-          maxLength={4}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          style={{ width: 80, textAlign: "center", fontSize: 20, padding: "2px 6px" }}
-        />
-        <span style={{ fontSize: 11, color: PALETTE.inkDim }}>または下から選択</span>
-      </div>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 4 }}>
-        {EMOJI_PRESETS.map((e) => {
-          const on = value === e;
-          return (
-            <button
-              key={e}
-              type="button"
-              onClick={() => onChange(on ? "" : e)}
-              style={{
-                width: 34,
-                height: 34,
-                fontSize: 18,
-                background: on ? PALETTE.coral : PALETTE.paper,
-                border: `1.5px solid ${on ? PALETTE.accent : PALETTE.inkSoft}`,
-                borderRadius: 8,
-                cursor: "pointer",
-              }}
-            >{e}</button>
-          );
-        })}
       </div>
     </div>
   );
