@@ -9,6 +9,7 @@ export const PALETTE = {
   lilac: "#b4aedc",
   mint: "#a6d4bf",
   cream: "#f0d88a",
+  sky: "#9fc2dc",
   accent: "#d06a7e",
   ink: "#3a2e2a",
   inkDim: "#857670",

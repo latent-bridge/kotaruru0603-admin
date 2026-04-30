@@ -157,6 +157,59 @@ const ICONS: Record<string, IconComp> = {
   user: IconUser,
 };
 
+// Per-icon natural accent — kept in sync with the fan-site's ICON_ACCENTS
+// (apps/sites/kotaruru0603/components/Icon.tsx). The picker uses these so the
+// admin sees the same colours that will render on the public site.
+const ICON_ACCENTS: Record<string, string> = {
+  fish: PALETTE.sky,
+  rain: PALETTE.sky,
+  cloud: PALETTE.sky,
+  leaf: PALETTE.mint,
+  sun: PALETTE.cream,
+  moon: PALETTE.lilac,
+  sparkle: PALETTE.lilac,
+  star: PALETTE.cream,
+  crown: PALETTE.cream,
+  trophy: PALETTE.cream,
+  key: PALETTE.cream,
+  bell: PALETTE.cream,
+  check: PALETTE.mint,
+  heart: PALETTE.accent,
+  live: PALETTE.accent,
+  letter: PALETTE.accent,
+  ramen: PALETTE.cream,
+  candy: PALETTE.lilac,
+  onigiri: PALETTE.ink,
+  pencil: PALETTE.ink,
+  camera: PALETTE.ink,
+  search: PALETTE.ink,
+  settings: PALETTE.ink,
+  arrow: PALETTE.ink,
+  user: PALETTE.ink,
+  katana: PALETTE.ink,
+  kabuto: PALETTE.ink,
+  shuriken: PALETTE.ink,
+  hinawa: PALETTE.ink,
+  mon: PALETTE.ink,
+  yumi: PALETTE.ink,
+  taiko: PALETTE.accent,
+  nobori: PALETTE.accent,
+  tank: PALETTE.ink,
+  jet: PALETTE.ink,
+  missile: PALETTE.ink,
+  helmet: PALETTE.ink,
+  gasmask: PALETTE.ink,
+  grenade: PALETTE.ink,
+  barbed: PALETTE.ink,
+  radio: PALETTE.ink,
+  mg: PALETTE.ink,
+  boom: PALETTE.cream,
+};
+
+function iconAccent(name: string): string {
+  return ICON_ACCENTS[name] ?? PALETTE.coral;
+}
+
 const PRESET: string[] = [
   "controller",
   "mic",
@@ -202,7 +255,7 @@ const CATEGORIES: { label: string; items: string[] }[] = [
 function PreviewIcon({ name, size, accent }: { name: string; size: number; accent?: string }) {
   const Comp = ICONS[name];
   if (!Comp) return null;
-  return <Comp size={size} accent={accent ?? PALETTE.ink} />;
+  return <Comp size={size} accent={accent ?? iconAccent(name)} />;
 }
 
 export function IconPicker({
@@ -323,7 +376,7 @@ function PresetButton({
         padding: 0,
       }}
     >
-      <PreviewIcon name={name} size={20} accent={selected ? "#fff" : PALETTE.ink} />
+      <PreviewIcon name={name} size={20} accent={selected ? "#fff" : undefined} />
     </button>
   );
 }
@@ -442,7 +495,7 @@ function IconPickerModal({
                       padding: 0,
                     }}
                   >
-                    <PreviewIcon name={name} size={22} accent={selected ? "#fff" : PALETTE.ink} />
+                    <PreviewIcon name={name} size={22} accent={selected ? "#fff" : undefined} />
                   </button>
                 );
               })}
